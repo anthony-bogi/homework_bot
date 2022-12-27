@@ -2,7 +2,6 @@ import logging
 import os
 import time
 from http import HTTPStatus
-from logging.handlers import RotatingFileHandler
 
 import requests
 import telegram
@@ -30,7 +29,7 @@ HOMEWORK_VERDICTS = {
 formatter = logging.Formatter(
     '%(asctime)s, %(levelname)s, %(message)s'
 )
-    
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler(stream='sys.stdout')
@@ -42,7 +41,6 @@ error_cache = []
 
 def check_tokens():
     """Проверка доступности переменных окружения."""
-
     if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
         return True
     else:
@@ -51,7 +49,6 @@ def check_tokens():
 
 def send_message(bot, message):
     """Отправляет сообщение в Telegram чат."""
-
     try:
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.debug(f'Сообщение {message} отправлено пользователю.')
@@ -80,26 +77,29 @@ def get_api_answer(timestamp):
     Запрос к единственному эндпоинту API-сервиса.
     Возвращает ответ API в формате типа данныз Python.
     """
-
     payload = {'from_date': timestamp}
 
     try:
-        homework_statuses = requests.get(ENDPOINT, headers=HEADERS, params=payload)
+        homework_statuses = requests.get(
+            ENDPOINT,
+            headers=HEADERS,
+            params=payload
+            )
         if homework_statuses.status_code != HTTPStatus.OK:
             raise Exception('Эндпоинт недоступен.')
     except Exception:
         raise APIAnswerError('Незапланированная работа API.')
-    
+
     homework_statuses = homework_statuses.json()
     return homework_statuses
 
 
 def check_response(response):
     """Проверка ответа API на соответствие документации."""
-
     if not isinstance(response, dict):
-        raise TypeError('Ошибка в типе данных: ответ должен содержать словарь.')
-    
+        raise TypeError('Ошибка в типе данных: ответ должен содержать '
+                        'словарь.')
+
     keys = response.keys()
 
     if 'homeworks' not in keys:
@@ -112,13 +112,15 @@ def check_response(response):
         raise IndexError('Домашняя работа отсутсвует в списке.')
 
     homework = response['homeworks'][0]
-    
+
     return homework
 
 
 def parse_status(homework):
-    """Извлекает из информации о конкретной домашней работе статус этой работы."""
-    
+    """
+    Извлекает из информации о конкретной домашней работе
+    статус этой работы.
+    """
     keys = ['homework_name', 'status']
 
     for key in keys:
@@ -138,15 +140,14 @@ def parse_status(homework):
 
 def main():
     """Основная логика работы бота."""
-
-    # THREE_WEEKS_SEC = 21 * 24 * 60 * 60 # Использую для отладки кода
+    # THREE_WEEKS_SEC = 21 * 24 * 60 * 60  # Использую для отладки кода
 
     if not check_tokens():
         logger.critical('Отсутствуют обязательные переменные окружения!')
         raise SystemExit()
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    timestamp = int(time.time()) # - THREE_WEEKS_SEC # Для отладки кода
+    timestamp = int(time.time())  # - THREE_WEEKS_SEC  # Для отладки кода
 
     cache = []
 
@@ -164,7 +165,7 @@ def main():
             message = (f'Сбой в работе программы: {error}')
             error_log_and_inf_in_telegram(bot, message)
         finally:
-            time.sleep(RETRY_PERIOD)     
+            time.sleep(RETRY_PERIOD)
 
 
 if __name__ == '__main__':
