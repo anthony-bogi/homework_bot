@@ -80,11 +80,10 @@ def get_api_answer(timestamp):
     payload = {'from_date': timestamp}
 
     try:
-        homework_statuses = requests.get(
-            ENDPOINT,
-            headers=HEADERS,
-            params=payload
-            )
+        homework_statuses = requests.get(ENDPOINT,
+                                         headers=HEADERS,
+                                         params=payload
+                                         )
         if homework_statuses.status_code != HTTPStatus.OK:
             raise Exception('Эндпоинт недоступен.')
     except Exception:
@@ -117,10 +116,7 @@ def check_response(response):
 
 
 def parse_status(homework):
-    """
-    Извлекает из информации о конкретной домашней работе
-    статус этой работы.
-    """
+    """Извлекает статус конкретной работы."""
     keys = ['homework_name', 'status']
 
     for key in keys:
