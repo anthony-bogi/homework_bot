@@ -7,6 +7,7 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
+from constants import *
 from exceptions import APIAnswerError
 
 load_dotenv()
@@ -16,7 +17,6 @@ PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
-RETRY_PERIOD = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
 HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
 
@@ -41,10 +41,7 @@ error_cache = []
 
 def check_tokens():
     """Проверка доступности переменных окружения."""
-    if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
-        return True
-    else:
-        return False
+    return PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID
 
 
 def send_message(bot, message):
@@ -136,14 +133,13 @@ def parse_status(homework):
 
 def main():
     """Основная логика работы бота."""
-    # THREE_WEEKS_SEC = 21 * 24 * 60 * 60  # Использую для отладки кода
 
     if not check_tokens():
         logger.critical('Отсутствуют обязательные переменные окружения!')
         raise SystemExit()
 
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    timestamp = int(time.time())  # - THREE_WEEKS_SEC  # Для отладки кода
+    timestamp = int(time.time()) - THREE_WEEKS_SEC
 
     cache = []
 
