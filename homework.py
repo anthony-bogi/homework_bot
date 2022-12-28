@@ -7,7 +7,7 @@ import requests
 import telegram
 from dotenv import load_dotenv
 
-from constants import *
+from constants import RETRY_PERIOD, THREE_WEEKS_SEC
 from exceptions import APIAnswerError
 
 load_dotenv()
